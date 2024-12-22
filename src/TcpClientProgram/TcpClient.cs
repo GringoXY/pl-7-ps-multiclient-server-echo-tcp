@@ -40,18 +40,21 @@ internal sealed class TcpClient(string hostname, int port)
             string receivedServerMessage = Encoding.ASCII.GetString(data, 0, bytes);
             Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
 
-            string messageToSend;
-
-            Console.Write("Wyślij wiadomość do serwera: ");
-            while ((messageToSend = Console.ReadLine()).Equals("exit", StringComparison.OrdinalIgnoreCase) == false)
+            if (string.Equals(receivedServerMessage, Configs.ServerBusyErrorMessage, StringComparison.InvariantCultureIgnoreCase) == false)
             {
-                byte[] encodedMessage = Encoding.ASCII.GetBytes(messageToSend);
-
-                socket.Send(encodedMessage);
-
-                Console.WriteLine($"Wysłano wiadomość o długości {encodedMessage.Length} bajtów: {messageToSend}");
+                string messageToSend;
 
                 Console.Write("Wyślij wiadomość do serwera: ");
+                while ((messageToSend = Console.ReadLine()).Equals("exit", StringComparison.OrdinalIgnoreCase) == false)
+                {
+                    byte[] encodedMessage = Encoding.ASCII.GetBytes(messageToSend);
+
+                    socket.Send(encodedMessage);
+
+                    Console.WriteLine($"Wysłano wiadomość o długości {encodedMessage.Length} bajtów: {messageToSend}");
+
+                    Console.Write("Wyślij wiadomość do serwera: ");
+                }
             }
         }
         catch (SocketException se)
