@@ -3,7 +3,9 @@ Project of the multi-client ECHO TCP server-client for the faculty "PS" (Network
 
 # Docs
 Refer to [PS - Lab 01 - EchoKlientTCP.pdf](./docs/PS%20-%20Lab%2001%20-%20EchoKlientTCP.pdf)
+
 Refer to [PS - Lab 02 - EchoSerwerTCP](./docs/PS%20-%20Lab%2002%20-%20EchoSerwerTCP.pdf)
+
 Refer to [PS - Lab 04 - EchoSerwerTCPWielowatkowy](./docs/PS%20-%20Lab%2004%20-%20EchoSerwerTCPWielowatkowy.pdf)
 
 ## Requirements
