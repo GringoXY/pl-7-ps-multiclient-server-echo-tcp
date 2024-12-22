@@ -16,7 +16,7 @@ Make sure you conform [Requirements](#requirements) and your CLI points to the r
 
 ### Run server
 ```terminal
-dotnet run --project src\TcpServerProgram
+dotnet run --project src\IterativeTcpServerProgram
 ```
 
 ### Run client
