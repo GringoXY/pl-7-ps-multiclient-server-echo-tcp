@@ -119,7 +119,7 @@ internal sealed class IterativeMultiClientTcpServer(int port)
                 string receivedClientMessage = Encoding.ASCII.GetString(buffer, 0, bytes);
                 Console.WriteLine($"Wiadomość od klienta #{clientId} o długości {bytes} bajtów: {receivedClientMessage}");
 
-                Console.WriteLine("Odsyłanie wiadomości do klienta...");
+                Console.WriteLine($"Odsyłanie wiadomości do klienta #{clientId}...");
 
                 clientSocket.Send(buffer);
             }

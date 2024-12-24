@@ -44,7 +44,7 @@ internal sealed class TcpClient(string hostname, int port)
             {
                 string messageToSend;
 
-                Console.Write("Wyślij wiadomość do serwera: ");
+                Console.Write("Wyślij wiadomość do serwera (\"exit\" zamyka klienta): ");
                 while ((messageToSend = Console.ReadLine()).Equals("exit", StringComparison.OrdinalIgnoreCase) == false)
                 {
                     byte[] encodedMessage = Encoding.ASCII.GetBytes(messageToSend);
@@ -53,7 +53,7 @@ internal sealed class TcpClient(string hostname, int port)
 
                     Console.WriteLine($"Wysłano wiadomość o długości {encodedMessage.Length} bajtów: {messageToSend}");
 
-                    Console.Write("Wyślij wiadomość do serwera: ");
+                    Console.Write("Wyślij wiadomość do serwera (\"exit\" zamyka klienta): ");
                 }
             }
         }
