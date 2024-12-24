@@ -23,3 +23,7 @@ dotnet run --project src\IterativeMultiClientTcpServerProgram
 ```terminal
 dotnet run --project src\TcpClientProgram
 ```
+
+## Server configuration
+### Max connections
+In order to increase or decrease max connections change value in [Configs.MaxConnections](./src/Shared/Configs.cs)

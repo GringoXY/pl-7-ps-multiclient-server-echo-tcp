@@ -8,7 +8,6 @@ namespace IterativeMultiClientTcpServerProgram;
 // https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.listen?view=net-9.0&redirectedfrom=MSDN#System_Net_Sockets_Socket_Listen_System_Int32_
 internal sealed class IterativeMultiClientTcpServer(int port)
 {
-    private static readonly int MaxConnections = 3;
     private static readonly byte[] ServerBusyMessage = Encoding.UTF8.GetBytes(Configs.ServerBusyErrorMessage);
     private static readonly object LockObject = new();
     private static readonly List<Thread> ConnectedClients = [];
@@ -46,13 +45,13 @@ internal sealed class IterativeMultiClientTcpServer(int port)
             Console.WriteLine("Uruchomiono serwer");
             Console.ForegroundColor = ConsoleColor.Gray;
 
+            Console.WriteLine("Oczekiwanie na połączenie z klientami...");
             while (true)
             {
-                Console.WriteLine("Oczekiwanie na połączenie z klientem...");
                 Socket clientSocket = await socket.AcceptAsync();
                 lock (LockObject)
                 {
-                    if (ConnectedClients.Count >= MaxConnections)
+                    if (ConnectedClients.Count >= Configs.MaxConnections)
                     {
                         RejectClient(clientSocket);
                     }
