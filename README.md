@@ -24,6 +24,9 @@ dotnet run --project src\IterativeMultiClientTcpServerProgram
 dotnet run --project src\TcpClientProgram
 ```
 
-## Server configuration
+## Server manual
 ### Max connections
 In order to increase or decrease max connections change value in [Configs.MaxConnections](./src/Shared/Configs.cs)
+
+### Close/exit server
+In order to close the server just click `Q` on the keyboard and server will shutdown.
