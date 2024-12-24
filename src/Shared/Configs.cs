@@ -9,4 +9,5 @@ public static class Configs
     public const int DefaultMessageBytesLength = 1_024;
     public const string ServerBusyErrorMessage = "SERVER BUSY";
     public const int MaxConnections = 3;
+    public const string ExitClientCommand = "exit";
 }

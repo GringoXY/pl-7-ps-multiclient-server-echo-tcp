@@ -33,27 +33,31 @@ internal sealed class TcpClient(string hostname, int port)
             Console.WriteLine("Połączono z serwerem!");
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            byte[] data = new byte[Configs.DefaultMessageBytesLength];
-            int bytes;
+            byte[] receivedData = new byte[Configs.DefaultMessageBytesLength];
+            int receivedBytes;
 
-            bytes = socket.Receive(data);
-            string receivedServerMessage = Encoding.ASCII.GetString(data, 0, bytes);
+            receivedBytes = socket.Receive(receivedData);
+            string receivedServerMessage = Encoding.ASCII.GetString(receivedData, 0, receivedBytes);
             Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
 
             if (string.Equals(receivedServerMessage, Configs.ServerBusyErrorMessage, StringComparison.InvariantCultureIgnoreCase) == false)
             {
                 string messageToSend;
 
-                Console.Write("Wyślij wiadomość do serwera (\"exit\" zamyka klienta): ");
-                while ((messageToSend = Console.ReadLine()).Equals("exit", StringComparison.OrdinalIgnoreCase) == false)
+                Console.Write($"Wyślij wiadomość do serwera (\"{Configs.ExitClientCommand}\" zamyka klienta): ");
+                while ((messageToSend = Console.ReadLine()).Equals(Configs.ExitClientCommand, StringComparison.OrdinalIgnoreCase) == false)
                 {
-                    byte[] encodedMessage = Encoding.ASCII.GetBytes(messageToSend);
+                    byte[] encodedMessageToSend = Encoding.ASCII.GetBytes(messageToSend);
 
-                    socket.Send(encodedMessage);
+                    socket.Send(encodedMessageToSend);
 
-                    Console.WriteLine($"Wysłano wiadomość o długości {encodedMessage.Length} bajtów: {messageToSend}");
+                    Console.WriteLine($"Wysłano wiadomość o długości {encodedMessageToSend.Length} bajtów: {messageToSend}");
 
-                    Console.Write("Wyślij wiadomość do serwera (\"exit\" zamyka klienta): ");
+                    receivedBytes = socket.Receive(receivedData);
+                    receivedServerMessage = Encoding.ASCII.GetString(receivedData, 0, receivedBytes);
+                    Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
+
+                    Console.Write($"Wyślij wiadomość do serwera (\"{Configs.ExitClientCommand}\" zamyka klienta): ");
                 }
             }
         }
