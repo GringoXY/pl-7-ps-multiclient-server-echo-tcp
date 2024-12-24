@@ -6,17 +6,14 @@ using System.Text;
 namespace IterativeMultiClientTcpServerProgram;
 
 // https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.listen?view=net-9.0&redirectedfrom=MSDN#System_Net_Sockets_Socket_Listen_System_Int32_
+// https://stackoverflow.com/questions/19218589/tcp-server-with-multiple-clients
+// https://stackoverflow.com/questions/49720212/multiple-clients-on-tcplistener-c-sharp-server-sending-data
 internal sealed class IterativeMultiClientTcpServer(int port)
 {
-    private static readonly byte[] ServerBusyMessage = Encoding.UTF8.GetBytes(Configs.ServerBusyErrorMessage);
-    private static readonly object LockObject = new();
-    private static readonly List<Thread> ConnectedClients = [];
-    private static int ClientId = 1;
-
-    /// <summary>
-    /// The time to wait for a response, in microseconds when `Socket.Poll()` is being called
-    /// </summary>
-    private readonly int _microSecondsPool = 1_000_000;
+    private static readonly byte[] _serverBusyEncodedMessage = Encoding.UTF8.GetBytes(Configs.ServerBusyErrorMessage);
+    private static readonly object _lockObject = new();
+    private static readonly List<(Thread, Socket)> _connectedClients = [];
+    private static int _clientId = 1;
 
     public int Port => port;
 
@@ -49,18 +46,22 @@ internal sealed class IterativeMultiClientTcpServer(int port)
             while (true)
             {
                 Socket clientSocket = await socket.AcceptAsync();
-                lock (LockObject)
+                lock (_lockObject)
                 {
-                    if (ConnectedClients.Count >= Configs.MaxConnections)
+                    if (_connectedClients.Count >= Configs.MaxConnections)
                     {
                         RejectClient(clientSocket);
                     }
                     else
                     {
-                        Thread clientThread = new(() => HandleClient(clientSocket, ClientId));
+                        Thread clientThread = new(() => HandleClient(clientSocket))
+                        {
+                            Name = $"#{_clientId}"
+                        };
                         clientThread.Start();
-                        ConnectedClients.Add(clientThread);
-                        ClientId += 1;
+                        _connectedClients.Add((clientThread, clientSocket));
+                        _clientId += 1;
+                        UpdateConnectionsDisplay();
                     }
                 }
             }
@@ -85,9 +86,9 @@ internal sealed class IterativeMultiClientTcpServer(int port)
         }
         finally
         {
-            foreach (Thread client in ConnectedClients)
+            foreach ((Thread clientThread, _) in _connectedClients)
             {
-                client.Join();
+                clientThread.Join();
             }
         }
 
@@ -97,16 +98,18 @@ internal sealed class IterativeMultiClientTcpServer(int port)
 
     private void RejectClient(Socket clientSocket)
     {
-        clientSocket.Send(ServerBusyMessage);
+        clientSocket.Send(_serverBusyEncodedMessage);
         clientSocket.Close();
     }
 
-    private void HandleClient(Socket clientSocket, int clientId)
+    private void HandleClient(Socket clientSocket)
     {
+        string clientId = Thread.CurrentThread.Name ?? string.Empty;
+
         try
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Klient z IP: {clientSocket.RemoteEndPoint} o ID: #{clientId} połączył się z serwerem!");
+            // Console.ForegroundColor = ConsoleColor.Green;
+            // Console.WriteLine($"Klient z IP: {clientSocket.RemoteEndPoint} o ID: {clientId} połączył się z serwerem!");
             Console.ForegroundColor = ConsoleColor.Gray;
 
             byte[] buffer = Encoding.ASCII.GetBytes("Witaj kliencie!");
@@ -116,9 +119,9 @@ internal sealed class IterativeMultiClientTcpServer(int port)
             while ((bytes = clientSocket.Receive(buffer)) > 0)
             {
                 string receivedClientMessage = Encoding.ASCII.GetString(buffer, 0, bytes);
-                Console.WriteLine($"Wiadomość od klienta #{clientId} o długości {bytes} bajtów: {receivedClientMessage}");
+                Console.WriteLine($"Wiadomość od klienta {Thread.CurrentThread.Name} o długości {bytes} bajtów: {receivedClientMessage}");
 
-                Console.WriteLine($"Odsyłanie wiadomości do klienta #{clientId}...");
+                Console.WriteLine($"Odsyłanie wiadomości do klienta {clientId}...");
 
                 clientSocket.Send(buffer);
             }
@@ -143,12 +146,29 @@ internal sealed class IterativeMultiClientTcpServer(int port)
         }
         finally
         {
-            lock (LockObject)
+            lock (_lockObject)
             {
-                ConnectedClients.Remove(Thread.CurrentThread);
+                _connectedClients.Remove((Thread.CurrentThread, clientSocket));
+                UpdateConnectionsDisplay();
             }
 
-            Console.WriteLine($"Połączenie z klientem #{clientId} zamknięte");
+            Console.WriteLine($"Połączenie z klientem {clientId} zamknięte");
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+    }
+
+    private void UpdateConnectionsDisplay()
+    {
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Yellow;
+
+        Console.SetCursorPosition(80, 10);
+        Console.WriteLine("Połączeni klienci:");
+        foreach ((Thread clientThread, Socket clientSocket) in _connectedClients)
+        {
+            Console.SetCursorPosition(80, 10 + _connectedClients.IndexOf((clientThread, clientSocket)) + 1);
+            Console.WriteLine($"{clientThread.Name} {clientSocket.RemoteEndPoint}");
         }
 
         Console.ForegroundColor = ConsoleColor.Gray;
