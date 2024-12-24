@@ -36,6 +36,7 @@ internal sealed class TcpClient(string hostname, int port)
             byte[] receivedData = new byte[Configs.DefaultMessageBytesLength];
             int receivedBytes;
 
+            NetworkStream stream = new(socket);
             receivedBytes = socket.Receive(receivedData);
             string receivedServerMessage = Encoding.ASCII.GetString(receivedData, 0, receivedBytes);
             Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
@@ -58,6 +59,7 @@ internal sealed class TcpClient(string hostname, int port)
                     Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
 
                     Console.Write($"Wyślij wiadomość do serwera (\"{Configs.ExitClientCommand}\" zamyka klienta): ");
+                    receivedData = new byte[Configs.DefaultMessageBytesLength];
                 }
             }
         }
@@ -79,8 +81,5 @@ internal sealed class TcpClient(string hostname, int port)
                 Console.Error.WriteLine($"Wyjątek wewnętrzny: {e.InnerException?.Message}");
             }
         }
-
-        Console.WriteLine("Zamykanie klienta. Naciśnij enter, aby zakończyć");
-        Console.ReadKey();
     }
 }

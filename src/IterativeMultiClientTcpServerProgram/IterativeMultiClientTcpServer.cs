@@ -106,9 +106,6 @@ internal sealed class IterativeMultiClientTcpServer(int port)
         {
             DisconnectAllClients();
         }
-
-        Console.WriteLine("Zamykanie serwera. Naciśnij enter, aby zakończyć");
-        Console.ReadKey();
     }
 
     private void RejectClient(Socket clientSocket)
@@ -119,7 +116,8 @@ internal sealed class IterativeMultiClientTcpServer(int port)
 
     private void HandleClient(Socket clientSocket)
     {
-        string clientId = Thread.CurrentThread.Name;
+        string clientId = Thread.CurrentThread.Name!;
+        NetworkStream stream = new(clientSocket);
 
         try
         {
@@ -129,18 +127,19 @@ internal sealed class IterativeMultiClientTcpServer(int port)
 
             byte[] welcomeBuffer = Encoding.ASCII.GetBytes("Witaj kliencie!");
             int bytes = welcomeBuffer.Length;
-            clientSocket.Send(welcomeBuffer);
+            stream.Write(welcomeBuffer);
 
-            byte[] buffer = new byte[Configs.DefaultMessageBytesLength];
-            while ((bytes = clientSocket.Receive(buffer)) > 0)
+            byte[] readBuffer = new byte[Configs.DefaultMessageBytesLength];
+            while ((bytes = clientSocket.Receive(readBuffer)) > 0)
             {
-                string receivedClientMessage = Encoding.ASCII.GetString(buffer, 0, bytes);
+                string receivedClientMessage = Encoding.ASCII.GetString(readBuffer, 0, bytes);
                 Console.WriteLine($"Wiadomość od klienta {clientId} o długości {bytes} bajtów: {receivedClientMessage}");
 
                 Console.WriteLine($"Odsyłanie wiadomości do klienta {clientId}...");
 
-                buffer = Encoding.ASCII.GetBytes(receivedClientMessage);
-                clientSocket.Send(buffer, bytes, SocketFlags.None);
+                byte[] writeBuffer = Encoding.ASCII.GetBytes(receivedClientMessage);
+                clientSocket.Send(writeBuffer);
+                readBuffer = new byte[Configs.DefaultMessageBytesLength];
             }
         }
         catch (SocketException se)
