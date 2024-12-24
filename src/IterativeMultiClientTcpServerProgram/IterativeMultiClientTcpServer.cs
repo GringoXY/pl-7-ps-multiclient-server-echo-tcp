@@ -44,7 +44,8 @@ internal sealed class IterativeMultiClientTcpServer(int port)
             Console.ForegroundColor = ConsoleColor.Gray;
 
             Console.WriteLine("Oczekiwanie na połączenie z klientami...");
-            Thread exitServerThread = new(async () =>
+
+            Thread exitServerThread = new(() =>
             {
                 while (true)
                 {
