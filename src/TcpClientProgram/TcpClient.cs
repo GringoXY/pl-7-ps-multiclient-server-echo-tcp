@@ -47,6 +47,11 @@ internal sealed class TcpClient(string hostname, int port)
                 Console.Write($"Wyślij wiadomość do serwera (\"{Configs.ExitClientCommand}\" zamyka klienta): ");
                 while ((messageToSend = Console.ReadLine()).Equals(Configs.ExitClientCommand, StringComparison.OrdinalIgnoreCase) == false)
                 {
+                    if (string.IsNullOrEmpty(messageToSend))
+                    {
+                        continue;
+                    }
+
                     byte[] encodedMessageToSend = Encoding.ASCII.GetBytes(messageToSend);
 
                     socket.Send(encodedMessageToSend);
