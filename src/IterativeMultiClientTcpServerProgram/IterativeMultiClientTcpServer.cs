@@ -117,7 +117,6 @@ internal sealed class IterativeMultiClientTcpServer(int port)
     private void HandleClient(Socket clientSocket)
     {
         string clientId = Thread.CurrentThread.Name!;
-        NetworkStream stream = new(clientSocket);
 
         try
         {

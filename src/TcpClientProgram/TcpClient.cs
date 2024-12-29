@@ -7,8 +7,8 @@ namespace TcpClientProgram;
 
 internal sealed class TcpClient(string hostname, int port)
 {
-    public int Port { get; private set; } = port;
-    public string Hostname { get; private set; } = hostname;
+    public int Port => port;
+    public string Hostname => hostname;
 
     public void Start()
     {
@@ -36,12 +36,11 @@ internal sealed class TcpClient(string hostname, int port)
             byte[] receivedData = new byte[Configs.DefaultMessageBytesLength];
             int receivedBytes;
 
-            NetworkStream stream = new(socket);
             receivedBytes = socket.Receive(receivedData);
             string receivedServerMessage = Encoding.ASCII.GetString(receivedData, 0, receivedBytes);
             Console.WriteLine($"Wiadomość z serwera: {receivedServerMessage}");
 
-            if (string.Equals(receivedServerMessage, Configs.ServerBusyErrorMessage, StringComparison.InvariantCultureIgnoreCase) == false)
+            if (string.Equals(receivedServerMessage, Configs.ServerBusyErrorMessage, StringComparison.OrdinalIgnoreCase) == false)
             {
                 string messageToSend;
 
