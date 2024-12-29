@@ -126,7 +126,7 @@ internal sealed class IterativeMultiClientTcpServer(int port)
 
             byte[] welcomeBuffer = Encoding.ASCII.GetBytes("Witaj kliencie!");
             int bytes = welcomeBuffer.Length;
-            stream.Write(welcomeBuffer);
+            clientSocket.Send(welcomeBuffer);
 
             byte[] readBuffer = new byte[Configs.DefaultMessageBytesLength];
             while ((bytes = clientSocket.Receive(readBuffer)) > 0)
